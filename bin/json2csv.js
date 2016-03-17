@@ -10,6 +10,7 @@ var debug = require('debug')('json2csv:cli');
 var json2csv = require('../lib/json2csv');
 var parseLdJson = require('../lib/parse-ldjson');
 var pkg = require('../package');
+var lodashGet = require('lodash.get');
 
 program
   .version(pkg.version)
@@ -26,6 +27,7 @@ program
   .option('-F, --flatten', 'Flatten nested objects')
   .option('-L, --ldjson', 'Treat the input as Line-Delimited JSON.')
   .option('-p, --pretty', 'Use only when printing to console. Logs output in pretty tables.')
+  .option('-D, --datapath [value]', 'Path to data if array is not the top level object.')
   .parse(process.argv);
 
 function getFields(callback) {
@@ -104,6 +106,10 @@ getFields(function (err, fields) {
   getInput(function (inputError, input) {
     if (inputError) {
       throw new Error('Couldn\'t get the input: ' + inputError);
+    }
+
+    if(program.datapath) {
+      input = lodashGet(input, program.datapath);
     }
 
     var opts = {
